@@ -27,7 +27,8 @@ app.get('/ping/db', async (req: Request, res: Response) => {
     await getDB().command({ ping: 1 });
     res.json({ ok: true, message: 'MongoDB connection is healthy' });
   } catch (error) {
-    res.status(500).json({ ok: false, message: 'MongoDB connection failed' });
+    console.error('Database ping error:', error);
+    res.status(500).json({ ok: false, message: 'MongoDB connection failed', error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
 

@@ -16,9 +16,14 @@ export const connectDB = async (): Promise<Db> => {
     return db;
   }
 
-  await client.connect();
-  db = client.db(dbName);
-  console.log(`Connected to MongoDB database: ${dbName}`);
+  try {
+    await client.connect();
+    db = client.db(dbName);
+    console.log(`Connected to MongoDB database: ${dbName}`);
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    throw error;
+  }
 
   return db;
 };
