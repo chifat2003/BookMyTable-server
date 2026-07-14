@@ -2,7 +2,7 @@ import cors from 'cors';
 import express, { type Express, type Request, type Response } from 'express';
 import { ObjectId } from 'mongodb';
 
-import { getDB } from './config/db';
+import { getDB, ensureConnected } from './config/db';
 
 const app: Express = express();
 
@@ -24,6 +24,7 @@ app.get('/ping', (req: Request, res: Response) => {
 
 app.get('/ping/db', async (req: Request, res: Response) => {
   try {
+    await ensureConnected();
     await getDB().command({ ping: 1 });
     res.json({ ok: true, message: 'MongoDB connection is healthy' });
   } catch (error) {
@@ -34,6 +35,7 @@ app.get('/ping/db', async (req: Request, res: Response) => {
 
 app.get('/restaurants', async (req: Request, res: Response) => {
   try {
+    await ensureConnected();
     const restaurants = await getDB()
       .collection('restaurants')
       .find()
@@ -51,6 +53,7 @@ app.get('/restaurants', async (req: Request, res: Response) => {
       data: normalized,
     });
   } catch (error) {
+    console.error('Error fetching restaurants:', error);
     res.status(500).json({
       ok: false,
       message: 'Failed to fetch restaurants',
@@ -60,6 +63,7 @@ app.get('/restaurants', async (req: Request, res: Response) => {
 
 app.get('/restaurants/:id', async (req: Request, res: Response) => {
   try {
+    await ensureConnected();
     const { id } = req.params as { id: string };
 
     if (!ObjectId.isValid(id)) {
@@ -130,6 +134,7 @@ type ReservationRequestBody = {
 
 app.get('/reservations', async (req: Request, res: Response) => {
   try {
+    await ensureConnected();
     const reservations = await getDB()
       .collection('reservations')
       .find()
@@ -150,6 +155,7 @@ app.get('/reservations', async (req: Request, res: Response) => {
 
 app.get('/reservations/restaurant/:restaurantId', async (req: Request, res: Response) => {
   try {
+    await ensureConnected();
     const { restaurantId } = req.params as { restaurantId: string };
 
     if (!ObjectId.isValid(restaurantId)) {
@@ -177,6 +183,7 @@ app.get('/reservations/restaurant/:restaurantId', async (req: Request, res: Resp
 
 app.get('/reservations/user/:email', async (req: Request, res: Response) => {
   try {
+    await ensureConnected();
     const { email } = req.params as { email: string };
 
     const reservations = await getDB()
@@ -199,6 +206,7 @@ app.get('/reservations/user/:email', async (req: Request, res: Response) => {
 
 app.post('/reservations', async (req: Request, res: Response) => {
   try {
+    await ensureConnected();
     const {
       restaurantId,
       name,
@@ -272,6 +280,7 @@ app.post('/reservations', async (req: Request, res: Response) => {
 
 app.post('/restaurants', async (req: Request, res: Response) => {
   try {
+    await ensureConnected();
     const {
       name,
       cuisineType,
